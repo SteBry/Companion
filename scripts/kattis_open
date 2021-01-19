@@ -3,6 +3,7 @@ import os
 import shutil
 import sys
 import zipfile
+import pdfkit
 
 if len(sys.argv) not in [2, 3]:
     print("Usage: ./scripts/kattis_open problemname [language]")
@@ -15,8 +16,16 @@ if len(sys.argv) == 3 and sys.argv[2] == "py":
 
 problemname = sys.argv[1]
 problem_dir = os.path.join('kattis', problemname)
-problem_path = os.path.join('kattis', problemname, '{}.{}'.format(problemname, language))
-problem_solution = os.path.join('kattis', problemname, '{}.md'.format(problemname))
+problem_path = os.path.join('kattis', problemname,
+                            '{}.{}'.format(problemname, language))
+problem_library_path = os.path.join('kattis', problemname,
+                                    '{}.{}'.format("library", "cpp"))
+problem_library_h_path = os.path.join('kattis', problemname,
+                                      '{}.{}'.format("library", "h"))
+problem_solution = os.path.join(
+    'kattis', problemname, '{}.md'.format(problemname))
+problem_description = os.path.join(
+    'kattis', problemname, '{}.pdf'.format(problemname))
 problem_test = os.path.join('tests', problemname)
 
 try:
@@ -30,7 +39,14 @@ try:
 except FileExistsError:
     print("Test folder already exists")
 
-shutil.copyfile(os.path.join('library', 'template.{}'.format(language)), problem_path)
+shutil.copyfile(os.path.join(
+    'library', 'template.{}'.format(language)), problem_path)
+
+shutil.copyfile(os.path.join(
+    'library', 'library.{}'.format(language)), problem_library_path)
+shutil.copyfile(os.path.join(
+    'library', 'library.{}'.format("h")), problem_library_h_path)
+
 with open(problem_solution, 'w') as f:
     print("# Problem Type", file=f)
     print("", file=f)
@@ -40,16 +56,21 @@ with open(problem_solution, 'w') as f:
 print("'{}' was successfully opened, time to get solving!".format(problemname))
 
 sample_url = 'https://open.kattis.com/problems/{}/file/statement/samples.zip'
+problem_url = 'https://open.kattis.com/problems/{}/'
 url = sample_url.format(problemname)
+url2 = problem_url.format(problemname)
 
 # For some reason python http lib gets 403 forbidden ??? Just use wget instead -.-
 os.system('wget -q {}'.format(url))
+pdfkit.from_url(url2, problem_description)
+
 try:
     local_zip = 'samples.zip'
     f = zipfile.ZipFile(local_zip)
     f.extractall(problem_test)
     os.remove(local_zip)
+
     print("Samples fetched from kattis and put into tests folder")
 except:
-    print('Could not download sample input.' \
+    print('Could not download sample input.'
           + ' Perhaps none exist on Kattis or you do not have internet connection?')
