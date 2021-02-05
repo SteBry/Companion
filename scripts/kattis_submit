@@ -2,18 +2,29 @@
 import os
 import sys
 
+import settings
+
 if len(sys.argv) != 2:
     print("Usage: ./scripts/kattis_submit problemname")
     exit(0)
+
 
 def is_part_of_program(name):
     X = ['.py', '.cpp', '.hpp', '.h', '.c']
     return any(name.endswith(fileextension) for fileextension in X)
 
+
 problemname = sys.argv[1]
-problem_path = os.path.join('kattis', problemname)
+
+
+problem_path = os.path.join(settings.relative_problem_path, problemname)
+
+
 items = os.listdir(problem_path)
 items = list(filter(is_part_of_program, items))
+
+os.listdir(problem_path)
+
 main = [x for x in items if x.startswith(problemname)]
 if not main:
     print("Could not find main file!")
@@ -30,8 +41,12 @@ if main.endswith('.py'):
         extra = '-l "python 3"'
 
 
-others = [os.path.join('kattis', problemname, x) for x in items if x != main]
-main = os.path.join('kattis', problemname, main)
+others = [os.path.join(settings.relative_problem_path, problemname, x)
+          for x in items if x != main] + [os.path.join(settings.relative_library_path, "library.cpp"), os.path.join(settings.relative_library_path, "library.h")]
 
 
-os.system('python scripts/submit.py {} -f {} {}'.format(extra, main, ' '.join(others)))
+main = os.path.join(settings.relative_problem_path, problemname, main)
+
+print(others, main)
+os.system('python scripts/submit.py {} -f {} {}'.format(extra,
+                                                        main, ' '.join(others)))

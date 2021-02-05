@@ -4,6 +4,7 @@ import shutil
 import sys
 import zipfile
 import pdfkit
+import settings
 
 if len(sys.argv) not in [2, 3]:
     print("Usage: ./scripts/kattis_open problemname [language]")
@@ -15,17 +16,16 @@ if len(sys.argv) == 3 and sys.argv[2] == "py":
     language = 'py'
 
 problemname = sys.argv[1]
-problem_dir = os.path.join('kattis', problemname)
-problem_path = os.path.join('kattis', problemname,
-                            '{}.{}'.format(problemname, language))
-problem_library_path = os.path.join('kattis', problemname,
-                                    '{}.{}'.format("library", "cpp"))
-problem_library_h_path = os.path.join('kattis', problemname,
-                                      '{}.{}'.format("library", "h"))
+problem_dir = os.path.join(settings.relative_problem_path, problemname)
+
+
+problem_path = os.path.join(problem_dir, '{}.{}'.format(problemname, language))
+
 problem_solution = os.path.join(
-    'kattis', problemname, '{}.md'.format(problemname))
+    problem_dir, '{}.md'.format(problemname))
 problem_description = os.path.join(
-    'kattis', problemname, '{}.pdf'.format(problemname))
+    problem_dir, '{}.pdf'.format(problemname))
+
 problem_test = os.path.join('tests', problemname)
 
 try:
@@ -40,12 +40,7 @@ except FileExistsError:
     print("Test folder already exists")
 
 shutil.copyfile(os.path.join(
-    'library', 'template.{}'.format(language)), problem_path)
-
-shutil.copyfile(os.path.join(
-    'library', 'library.{}'.format(language)), problem_library_path)
-shutil.copyfile(os.path.join(
-    'library', 'library.{}'.format("h")), problem_library_h_path)
+    settings.relative_library_path, 'template.{}'.format(language)), problem_path)
 
 with open(problem_solution, 'w') as f:
     print("# Problem Type", file=f)

@@ -2,11 +2,13 @@
 import sys
 import os
 
+import settings
+
 if (len(sys.argv)) != 2:
     print("Not enough arguments")
     exit(0)
 problemname = sys.argv[1]
-problem_dir = os.path.join('kattis', problemname)
+problem_dir = os.path.join(settings.relative_problem_path, problemname)
 
 RED = '\x1b[38;5;1m'
 GREEN = '\x1b[38;5;2m'
@@ -37,13 +39,15 @@ except OSError:
 items = os.listdir(problem_dir)
 if is_cpp:
 
-    CC = 'g++ -std=c++14 -O2 -Wall -pedantic -o tmp/prg -I{}'.format(
-        problem_dir)
-    os.system('{} {} {}'.format(CC, os.path.join(
-        problem_dir, '{}.cpp'.format(problemname)),
-        os.path.join(
-        problem_dir, '{}.cpp'.format("library")
-    )))
+    CC = 'g++ -std=c++14 -O2 -Wall -pedantic -o tmp/prg -I{} -I{}'.format(
+        problem_dir, settings.relative_library_path)
+
+    os.system('{} {} {}'.format(
+        CC,
+        os.path.join(problem_dir, '{}.cpp'.format(problemname)),
+        os.path.join(settings.relative_library_path,
+                     '{}.cpp'.format("library"))
+    ))
 
     def test_for(in_file):
         os.system(
@@ -82,4 +86,4 @@ for in_file, ans_file in testing_tuples:
 
 if no_bad_ones:
     print("{}✔ - AC{}".format(GREEN, NULL))
-#os.system('rm -rf tmp')
+os.system('rm -rf tmp')
